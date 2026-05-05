@@ -1,0 +1,4 @@
+Date,Type,Ticker,Quantity,Price,Account Details,Notes
+2024-01-15,BUY,AAPL,10,135.50,TFSA,Initial buy
+2024-02-01,BUY,MSFT,5,400.00,Brokerage A,
+2024-03-20,SELL,AAPL,5,150.00,TFSA,Taking profits
