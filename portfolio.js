@@ -41,6 +41,8 @@ async function init() {
   await renderDashboard();
   
   const authBtn = document.getElementById('auth-btn');
+  const aboutLoginBtn = document.getElementById('about-login-btn');
+
   if (authBtn) {
     const { data } = await supabase.auth.getSession();
     if (data?.session) {
@@ -48,6 +50,12 @@ async function init() {
       // Use just the first name if available
       const firstName = name.split(' ')[0];
       authBtn.textContent = `Logout (${firstName})`;
+      
+      // Auto-route logged in users to Dashboard
+      document.querySelector('[data-target="dashboard-view"]')?.click();
+    } else {
+      // Auto-route unauthenticated users to the Welcome/About page
+      document.querySelector('[data-target="about-view"]')?.click();
     }
     
     authBtn.addEventListener('click', async () => {
@@ -57,9 +65,18 @@ async function init() {
         authBtn.textContent = 'Login';
         await renderHistory();
         await renderDashboard();
+        // Route back to About upon logout
+        document.querySelector('[data-target="about-view"]')?.click();
       } else {
         document.getElementById('auth-modal').classList.remove('hidden');
       }
+    });
+  }
+
+  // Bind the big Get Started button on the About page
+  if (aboutLoginBtn) {
+    aboutLoginBtn.addEventListener('click', () => {
+      document.getElementById('auth-modal').classList.remove('hidden');
     });
   }
 }

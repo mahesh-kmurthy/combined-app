@@ -16,7 +16,8 @@
         <h1>Zocalo</h1>
       </div>
       <nav class="app-nav">
-        <button class="nav-tab active" data-target="dashboard-view">Dashboard</button>
+        <button class="nav-tab active" data-target="about-view">About</button>
+        <button class="nav-tab" data-target="dashboard-view">Dashboard</button>
         <button class="nav-tab" data-target="transactions-view">Transactions</button>
         <button class="nav-tab" data-target="fundamental-view">Fundamental Analysis</button>
         <button class="nav-tab" data-target="faq-view">Help & FAQ</button>
@@ -25,8 +26,33 @@
     </header>
 
     <main>
+      <!-- ================= ABOUT / WELCOME VIEW ================= -->
+      <div id="about-view" class="view-section">
+        <div class="glass" style="max-width: 800px; margin: 0 auto; padding: 3rem; text-align: center; border-radius: var(--radius-lg);">
+          <h1 style="font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome to Zocalo</h1>
+          <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 3rem;">A comprehensive stock portfolio tracking and fundamental analysis platform built for all equity investors.</p>
+          
+          <div style="text-align: left; margin-bottom: 2.5rem;">
+            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.3rem;">Why We Built This</h3>
+            <p style="color: var(--text-muted); line-height: 1.6;">As equity investors, we found there was no single place to seamlessly input our portfolios and objectively evaluate performance against the broader market. Zocalo fills that gap. Whether you are a self-directed investor managing your own trades, or you want to objectively benchmark the performance of your wealth advisor against the S&P 500, Zocalo gives you the clarity you need.</p>
+          </div>
+
+          <div style="text-align: left; margin-bottom: 2.5rem;">
+            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.3rem;">Simplifying Valuation Models</h3>
+            <p style="color: var(--text-muted); line-height: 1.6;">When we first started investing, we had to learn valuation models from the ground up. We wanted to simplify this process. Zocalo incorporates our proprietary valuation models (including P/E Forecasting and DCF) directly into the Fundamental Analyzer. This allows investors to instantly run deep intrinsic value calculations with a single click, saving hours of spreadsheet work.</p>
+          </div>
+
+          <div style="text-align: left; margin-bottom: 3rem;">
+            <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.3rem;">Data Privacy & Security</h3>
+            <p style="color: var(--text-muted); line-height: 1.6;">Your financial data is your business. Zocalo uses enterprise-grade cloud databases secured with strict Row Level Security (RLS) policies. This means you authenticate securely via Google and absolutely no one else can see your portfolio.</p>
+          </div>
+
+          <button class="btn primary" id="about-login-btn" style="font-size: 1.1rem; padding: 14px 32px;">Get Started (Login with Google)</button>
+        </div>
+      </div>
+
       <!-- ================= PORTFOLIO DASHBOARD ================= -->
-      <div id="dashboard-view" class="view-section">
+      <div id="dashboard-view" class="view-section hidden">
       <!-- Overall Metrics -->
       <section class="overview-cards">
         <div class="card stat-card glass">
