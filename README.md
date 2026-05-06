@@ -4,57 +4,74 @@ Zocalo is a comprehensive stock portfolio tracking and fundamental analysis web 
 
 ## Architecture
 
-This project uses a modern, lightweight tech stack designed for speed and simplicity:
+This project is built using a modern, lightweight tech stack designed for speed, simplicity, and serverless deployment:
 
 - **Frontend:** Vanilla JavaScript, HTML5, and CSS3. 
   - Uses modern CSS (glassmorphism design, CSS variables).
   - Uses ES6 Modules (`type="module"`) to organize logic cleanly into `portfolio.js`, `fundamental.js`, `storage.js`, and `api.js`.
   - Uses `Chart.js` for dynamic portfolio allocation charts.
 
-- **Backend:** Python + FastAPI.
-  - The `server.py` file serves both as the API proxy and the static file server.
+- **Backend:** Python + FastAPI (Serverless).
+  - The backend resides in `api/index.py` and is fully configured for **Vercel Serverless Functions** (via `vercel.json`).
   - It fetches financial data from **Yahoo Finance** (via `yfinance`) and **Finnhub** (using `FINNHUB_API_KEY` if provided).
-  - Handles generating Excel exports for fundamental data.
+  - Handles generating Excel exports for fundamental data and processing autocomplete searches.
 
-- **Storage:** Supabase & LocalStorage.
-  - Transactions are securely stored in a Supabase PostgreSQL database if the user is authenticated.
-  - Falls back to `localStorage` automatically if used entirely offline without logging in.
+- **Authentication & Storage:** Supabase (PostgreSQL) + Google Cloud OAuth.
+  - Users authenticate via Google OAuth, which is handled securely by Supabase Auth.
+  - Transactions are securely stored in a cloud-hosted Supabase PostgreSQL database under the `transactions` table.
+  - The database is protected by Row Level Security (RLS) policies to ensure users can only view and modify their own portfolio data.
+  - Falls back to local device storage (`localStorage`) if the app is used without logging in.
 
-## Why Localhost is Required
+## Deployment to Vercel
 
-You **cannot** open `index.html` directly in your web browser (e.g. `file:///Users/.../index.html`). 
+This app is natively configured for Vercel deployment.
 
-1. **CORS Policies:** The frontend uses ES6 modules (`<script type="module">`). Modern web browsers enforce strict Cross-Origin Resource Sharing (CORS) rules that prevent local files from importing other local files via the `file://` protocol.
-2. **API Backend:** The frontend requires the FastAPI backend to be running to fetch live stock quotes, historical data, and autocomplete search results from Yahoo Finance and Finnhub.
+1. Create a new project in Vercel and import this repository.
+2. Vercel will automatically detect `vercel.json` and map all traffic starting with `/api/` to the Python backend (`api/index.py`), while natively hosting the frontend files on its Edge CDN.
+3. Add the `FINNHUB_API_KEY` to Vercel's Environment Variables if you want to use the premium data source.
+4. **Important**: Remember to update the **Site URL** and **Redirect URLs** in your Supabase dashboard to point to your new Vercel production domain!
 
-You must run the Python server and access the app via `http://localhost:8000`.
+## Running Locally
 
-## Installation & Setup
+Because the frontend uses ES6 modules (`<script type="module">`), modern web browsers will block the app from loading if you try to open `index.html` directly (e.g. `file:///Users/.../index.html`) due to strict CORS rules.
 
-1. **Prerequisites:** Make sure you have Python 3 installed.
-2. **Install Dependencies:**
+To run the app locally, you must start the Python server:
+
+1. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
-   (Dependencies include: `fastapi`, `uvicorn`, `yfinance`, `pandas`, `requests`, `openpyxl`)
-
-3. **Optional API Key:**
-   To use Finnhub for faster and more reliable live market data (especially for non-US stocks), export your API key before running the server:
+2. **Start the FastAPI Server:**
    ```bash
-   export FINNHUB_API_KEY="your_api_key_here"
+   uvicorn api.index:app --port 8000
    ```
+3. Open your web browser and navigate to: **http://localhost:8000**
 
-## Running the App
+## Supabase Database Setup
 
-Start the FastAPI server from your terminal:
+If you deploy this to a new Supabase project, you must initialize the database schema in the Supabase SQL Editor:
 
-```bash
-python server.py
-# Alternatively: uvicorn server:app --reload
+```sql
+CREATE TABLE transactions (
+  id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users NOT NULL,
+  type TEXT NOT NULL,
+  ticker TEXT NOT NULL,
+  date DATE NOT NULL,
+  qty NUMERIC NOT NULL,
+  price NUMERIC NOT NULL,
+  account TEXT,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert their own transactions" ON transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can view their own transactions" ON transactions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can update their own transactions" ON transactions FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own transactions" ON transactions FOR DELETE USING (auth.uid() = user_id);
 ```
-
-Then, open your web browser and navigate to:
-**http://localhost:8000**
 
 ## Features
 
@@ -63,4 +80,4 @@ Then, open your web browser and navigate to:
 - **S&P 500 Benchmarking:** Simulates your exact trading history against the S&P 500 (VOO) to show if you are outperforming the market.
 - **Fundamental Analysis:** Deep dive into 5 years of financials, automatically extracting Income Statements, Balance Sheets, and Cash Flows.
 - **Valuation Models:** Real-time P/E Forecasting and Discounted Cash Flow (DCF) intrinsic value modeling.
-- **Excel Export:** Download all financial data directly into an Excel file or upload your own custom spreadsheet template for the backend to inject data into.
+- **Excel Export:** Download all financial data directly into an Excel file.
