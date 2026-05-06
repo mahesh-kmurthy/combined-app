@@ -3,8 +3,8 @@
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const SUPABASE_URL = 'https://zlbbhzxhpvqwljjvxtgm.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_7TfC7NLyEwKQDU_jFiJI9Q_9Y2-3r6Z';
+const SUPABASE_URL = 'https://wmqftquxqzrmvlwciiee.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_opC7-cYMG9CJbfjbU-kX6w_xZgpgYfH';
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const TXN_KEY = 'portfolio_transactions';
@@ -19,7 +19,7 @@ export async function getTransactions() {
       .order('date', { ascending: false });
     if (!error && data) return data;
   }
-  
+
   // Fallback to local storage if not logged in
   const data = localStorage.getItem(TXN_KEY);
   return data ? JSON.parse(data) : [];
@@ -37,7 +37,7 @@ export async function saveTransaction(txn) {
     if (error) console.error("Error saving txn:", error);
     return await getTransactions();
   }
-  
+
   const transactions = await getTransactions();
   txn.id = Date.now().toString();
   transactions.push(txn);
@@ -61,7 +61,7 @@ export async function importTransactions(txns) {
     if (error) console.error("Error importing txns:", error);
     return await getTransactions();
   }
-  
+
   let transactions = await getTransactions();
   txns.forEach(txn => {
     txn.id = Date.now().toString() + "-" + Math.random().toString(36).substr(2, 5);
@@ -90,7 +90,7 @@ export async function updateTransaction(txn) {
     if (error) console.error("Error updating txn:", error);
     return await getTransactions();
   }
-  
+
   let transactions = await getTransactions();
   const index = transactions.findIndex(t => t.id === txn.id);
   if (index !== -1) {
@@ -126,8 +126,8 @@ export async function deleteTransaction(id) {
 export async function deleteAllTransactions() {
   const { data: sessionData } = await supabase.auth.getSession();
   if (sessionData?.session) {
-     await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-     return [];
+    await supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    return [];
   }
   localStorage.removeItem(TXN_KEY);
   return [];
@@ -223,37 +223,37 @@ export function simulateBenchmark(transactions, vooHistory, currentVooPrice, usd
     let searchDate = new Date(t.date);
 
     for (let i = 0; i < 7; i++) {
-        const dateStr = searchDate.toISOString().split('T')[0];
-        if (!vooPriceOnDate && vooHistory && vooHistory[dateStr]) vooPriceOnDate = vooHistory[dateStr];
-        if (!dlrCadOnDate && dlrCadHistory && dlrCadHistory[dateStr]) dlrCadOnDate = dlrCadHistory[dateStr];
-        if (!dlrUsdOnDate && dlrUsdHistory && dlrUsdHistory[dateStr]) dlrUsdOnDate = dlrUsdHistory[dateStr];
-        searchDate.setDate(searchDate.getDate() - 1);
+      const dateStr = searchDate.toISOString().split('T')[0];
+      if (!vooPriceOnDate && vooHistory && vooHistory[dateStr]) vooPriceOnDate = vooHistory[dateStr];
+      if (!dlrCadOnDate && dlrCadHistory && dlrCadHistory[dateStr]) dlrCadOnDate = dlrCadHistory[dateStr];
+      if (!dlrUsdOnDate && dlrUsdHistory && dlrUsdHistory[dateStr]) dlrUsdOnDate = dlrUsdHistory[dateStr];
+      searchDate.setDate(searchDate.getDate() - 1);
     }
-    
+
     const isCAD = t.ticker.endsWith('.TO') || t.ticker.endsWith('.V') || t.ticker.endsWith('.NE');
     let historicalUsdRate = usdRate; // default to today's live rate if histories fail somehow
 
     if (isCAD && dlrCadOnDate > 0 && dlrUsdOnDate > 0) {
-        historicalUsdRate = dlrUsdOnDate / dlrCadOnDate;
+      historicalUsdRate = dlrUsdOnDate / dlrCadOnDate;
     }
-    
+
     const conversionRate = isCAD ? historicalUsdRate : 1;
     const dollarAmount = t.qty * t.price * conversionRate;
-    
+
     // Fallback if not found (e.g. data missing)
     if (!vooPriceOnDate) vooPriceOnDate = currentVooPrice;
-    
+
     if (vooPriceOnDate > 0) {
-        if (t.type === 'BUY') {
-            const sharesBought = dollarAmount / vooPriceOnDate;
-            simulatedShares += sharesBought;
-            simulatedCost += dollarAmount;
-        } else if (t.type === 'SELL') {
-            const avgCost = simulatedShares > 0 ? simulatedCost / simulatedShares : 0;
-            const sharesSold = dollarAmount / vooPriceOnDate;
-            simulatedShares -= sharesSold;
-            simulatedCost -= (avgCost * sharesSold);
-        }
+      if (t.type === 'BUY') {
+        const sharesBought = dollarAmount / vooPriceOnDate;
+        simulatedShares += sharesBought;
+        simulatedCost += dollarAmount;
+      } else if (t.type === 'SELL') {
+        const avgCost = simulatedShares > 0 ? simulatedCost / simulatedShares : 0;
+        const sharesSold = dollarAmount / vooPriceOnDate;
+        simulatedShares -= sharesSold;
+        simulatedCost -= (avgCost * sharesSold);
+      }
     }
   });
 
