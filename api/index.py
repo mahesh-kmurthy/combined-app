@@ -573,4 +573,6 @@ def api_search(q: str):
         print(f"Search error: {e}")
         return {"result": []}
 
-# Removed StaticFiles mounting logic for Vercel
+# Add static file mounting back for LOCAL testing
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
