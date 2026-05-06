@@ -263,6 +263,9 @@ function bindEvents() {
     authGoogleBtn.addEventListener('click', async () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
       });
       if (error) {
         authError.style.color = '#ef4444';

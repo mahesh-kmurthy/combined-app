@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -443,7 +442,8 @@ def get_stock_data(ticker: str):
         }
     }
 
-TEMPLATE_PATH = "user_template.xlsx"
+# UPDATE FOR VERCEL SERVERLESS: Use /tmp for writable operations
+TEMPLATE_PATH = "/tmp/user_template.xlsx"
 
 @app.post("/api/template/upload")
 async def upload_template(file: UploadFile = File(...)):
@@ -573,9 +573,4 @@ def api_search(q: str):
         print(f"Search error: {e}")
         return {"result": []}
 
-# Mount static files at the root
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+# Removed StaticFiles mounting logic for Vercel
