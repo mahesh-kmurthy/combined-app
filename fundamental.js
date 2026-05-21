@@ -33,6 +33,14 @@ const elements = {
     dcfDiscountRateInput: document.getElementById('dcfDiscountRateInput'),
     dcfValuePerShare: document.getElementById('dcfValuePerShare'),
     dcfValueCmpRatio: document.getElementById('dcfValueCmpRatio'),
+    // Reverse DCF Model Elements
+    revDcfBaseFcfField: document.getElementById('revDcfBaseFcfField'),
+    revDcfNetDebtField: document.getElementById('revDcfNetDebtField'),
+    revDcfSharesOutField: document.getElementById('revDcfSharesOutField'),
+    revDcfCurrentPriceField: document.getElementById('revDcfCurrentPriceField'),
+    revDcfTermGrowthInput: document.getElementById('revDcfTermGrowthInput'),
+    revDcfDiscountRateInput: document.getElementById('revDcfDiscountRateInput'),
+    revDcfImpliedGrowth: document.getElementById('revDcfImpliedGrowth'),
     // Export Elements
     exportTickerLabel: document.getElementById('exportTickerLabel'),
     downloadExcelBtn: document.getElementById('downloadExcelBtn'),
@@ -132,6 +140,9 @@ elements.discountRateInput.addEventListener('input', calculatePEModel);
 elements.dcfTermGrowthInput.addEventListener('input', calculateDCFModel);
 elements.dcfGrowthRateInput.addEventListener('input', calculateDCFModel);
 elements.dcfDiscountRateInput.addEventListener('input', calculateDCFModel);
+
+elements.revDcfTermGrowthInput.addEventListener('input', calculateReverseDCFModel);
+elements.revDcfDiscountRateInput.addEventListener('input', calculateReverseDCFModel);
 
 // Export Tab Listeners
 elements.downloadExcelBtn.addEventListener('click', () => {
@@ -299,8 +310,23 @@ function initValuationModels(data) {
     
     elements.dcfGrowthRateInput.value = avg3yGrowth ? avg3yGrowth.toFixed(2) : "0.00";
 
+    // Reverse DCF Model Init
+    let sharesOut = currentData.financials.balance_sheet["Ordinary Shares Number"]?.[recentDate] || 
+                    currentData.financials.balance_sheet["Share Issued"]?.[recentDate] || 1;
+                    
+    elements.revDcfBaseFcfField.dataset.rawFcf = baseFcf;
+    elements.revDcfNetDebtField.dataset.rawDebt = netDebt;
+    elements.revDcfSharesOutField.dataset.rawShares = sharesOut;
+    elements.revDcfCurrentPriceField.dataset.rawPrice = currentData.current_price;
+    
+    elements.revDcfBaseFcfField.value = `$${(baseFcf / 1e6).toFixed(2)} M`;
+    elements.revDcfNetDebtField.value = `$${(netDebt / 1e6).toFixed(2)} M`;
+    elements.revDcfSharesOutField.value = `${(sharesOut / 1e6).toFixed(2)} M`;
+    elements.revDcfCurrentPriceField.value = `$${currentData.current_price.toFixed(2)}`;
+
     calculatePEModel();
     calculateDCFModel();
+    calculateReverseDCFModel();
 }
 
 function calculatePEModel() {
@@ -308,7 +334,7 @@ function calculatePEModel() {
     
     const peAvgStr = elements.peAvgField.value;
     if (peAvgStr === "N/A" || peAvgStr === "-") {
-        elements.futurePriceTarget.textContent = "N/A";
+        elements.futurePriceTarget.value = "N/A";
         elements.currentValueTarget.textContent = "N/A";
         elements.valueCmpRatio.textContent = "N/A";
         elements.valueCmpRatio.style.color = "var(--text-primary)";
@@ -326,11 +352,17 @@ function calculatePEModel() {
     const cmp = currentData.current_price;
     const ratio = currentValue / cmp;
     
-    elements.futurePriceTarget.textContent = `$${futurePrice.toFixed(2)}`;
+    elements.futurePriceTarget.value = `$${futurePrice.toFixed(2)}`;
     elements.currentValueTarget.textContent = `$${currentValue.toFixed(2)}`;
     
     elements.valueCmpRatio.textContent = ratio.toFixed(2);
-    elements.valueCmpRatio.style.color = ratio > 1 ? 'var(--positive)' : 'var(--negative)';
+    if (ratio < 0.90) {
+        elements.valueCmpRatio.style.color = 'var(--negative)';
+    } else if (ratio <= 1.20) {
+        elements.valueCmpRatio.style.color = 'var(--warning)';
+    } else {
+        elements.valueCmpRatio.style.color = 'var(--positive)';
+    }
 }
 
 function calculateDCFModel() {
@@ -378,7 +410,88 @@ function calculateDCFModel() {
     
     elements.dcfValuePerShare.textContent = `$${dcfPerShare.toFixed(2)}`;
     elements.dcfValueCmpRatio.textContent = ratio.toFixed(2);
-    elements.dcfValueCmpRatio.style.color = ratio > 1 ? 'var(--positive)' : 'var(--negative)';
+    if (ratio < 0.90) {
+        elements.dcfValueCmpRatio.style.color = 'var(--negative)';
+    } else if (ratio <= 1.20) {
+        elements.dcfValueCmpRatio.style.color = 'var(--warning)';
+    } else {
+        elements.dcfValueCmpRatio.style.color = 'var(--positive)';
+    }
+}
+
+function calculateReverseDCFModel() {
+    if (!currentData) return;
+
+    const baseFcf = parseFloat(elements.revDcfBaseFcfField.dataset.rawFcf) || 0;
+    const netDebt = parseFloat(elements.revDcfNetDebtField.dataset.rawDebt) || 0;
+    const sharesOut = parseFloat(elements.revDcfSharesOutField.dataset.rawShares) || 1;
+    const currentPrice = parseFloat(elements.revDcfCurrentPriceField.dataset.rawPrice) || 0;
+    
+    const termGr = parseFloat(elements.revDcfTermGrowthInput.value) / 100;
+    const discRate = parseFloat(elements.revDcfDiscountRateInput.value) / 100;
+
+    const targetEquityValue = currentPrice * sharesOut;
+    const targetPv = targetEquityValue + netDebt;
+
+    // Binary search for implied growth rate
+    let low = -0.50; // -50%
+    let high = 1.00; // 100%
+    let impliedGr = 0;
+    const maxIterations = 50;
+    const tolerance = targetPv * 0.001; // 0.1% tolerance
+
+    // Helper function to calculate total PV given a starting growth rate
+    const getPvForGrowth = (startGr) => {
+        let sumPvFcf = 0;
+        let prevFcf = baseFcf;
+        let currentGr = startGr;
+
+        // Years 1-10
+        for (let i = 1; i <= 10; i++) {
+            const yearFcf = prevFcf * (1 + currentGr);
+            const pvFcf = yearFcf / Math.pow(1 + discRate, i);
+            sumPvFcf += pvFcf;
+            prevFcf = yearFcf;
+            currentGr = currentGr * 0.97; // Decay
+        }
+
+        const terminalValue = (prevFcf * (1 + termGr) / (discRate - termGr));
+        const pvTerminalValue = terminalValue / Math.pow(1 + discRate, 10);
+        
+        return sumPvFcf + pvTerminalValue;
+    };
+
+    // Before binary search, check if baseFcf is positive. 
+    // If it's negative or zero, simple reverse DCF is not directly solvable this way
+    if (baseFcf <= 0) {
+        elements.revDcfImpliedGrowth.textContent = "N/A";
+        elements.revDcfImpliedGrowth.title = "Base FCF is negative, cannot calculate implied growth directly.";
+        return;
+    }
+
+    for (let i = 0; i < maxIterations; i++) {
+        impliedGr = (low + high) / 2;
+        const currentPv = getPvForGrowth(impliedGr);
+
+        if (Math.abs(currentPv - targetPv) < tolerance) {
+            break;
+        }
+
+        if (currentPv < targetPv) {
+            low = impliedGr;
+        } else {
+            high = impliedGr;
+        }
+    }
+
+    elements.revDcfImpliedGrowth.textContent = `${(impliedGr * 100).toFixed(2)}%`;
+    if (impliedGr < 0.05) {
+        elements.revDcfImpliedGrowth.style.color = 'var(--positive)';
+    } else if (impliedGr <= 0.15) {
+        elements.revDcfImpliedGrowth.style.color = 'var(--warning)';
+    } else {
+        elements.revDcfImpliedGrowth.style.color = 'var(--negative)';
+    }
 }
 
 function renderValuationCards(valuation) {

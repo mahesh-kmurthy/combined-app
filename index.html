@@ -232,6 +232,7 @@
                   <div class="sub-tabs">
                       <button class="sub-tab-btn active" data-target="peModelContainer">P/E Based Valuation</button>
                       <button class="sub-tab-btn" data-target="dcfModelContainer">Discounted Cash Flow</button>
+                      <button class="sub-tab-btn" data-target="reverseDcfModelContainer">Reverse DCF</button>
                   </div>
 
                   <!-- P/E Model -->
@@ -254,12 +255,12 @@
                               <label>Discount Rate (%)</label>
                               <input type="number" step="0.1" id="discountRateInput" class="editable-field" value="10.0" />
                           </div>
+                          <div class="model-input-group">
+                              <label>Future Price 5Y</label>
+                              <input type="text" id="futurePriceTarget" readonly class="readonly-field" />
+                          </div>
                       </div>
                       <div class="model-results">
-                          <div class="result-box">
-                              <span>Future Price 5Y</span>
-                              <strong id="futurePriceTarget">-$0.00</strong>
-                          </div>
                           <div class="result-box">
                               <span>Current Value</span>
                               <strong id="currentValueTarget">-$0.00</strong>
@@ -304,6 +305,43 @@
                           <div class="result-box">
                               <span>Value / CMP</span>
                               <strong id="dcfValueCmpRatio">-</strong>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Reverse DCF Model -->
+                  <div id="reverseDcfModelContainer" class="model-container sub-tab-content">
+                      <h3>Reverse DCF (Implied Growth)</h3>
+                      <div class="model-grid">
+                          <div class="model-input-group">
+                              <label>Base FCF ($)</label>
+                              <input type="text" id="revDcfBaseFcfField" readonly class="readonly-field" />
+                          </div>
+                          <div class="model-input-group">
+                              <label>Net Debt ($)</label>
+                              <input type="text" id="revDcfNetDebtField" readonly class="readonly-field" />
+                          </div>
+                          <div class="model-input-group">
+                              <label>Shares Out.</label>
+                              <input type="text" id="revDcfSharesOutField" readonly class="readonly-field" />
+                          </div>
+                          <div class="model-input-group">
+                              <label>Current Price ($)</label>
+                              <input type="text" id="revDcfCurrentPriceField" readonly class="readonly-field" />
+                          </div>
+                          <div class="model-input-group">
+                              <label>Term Growth Rate (%)</label>
+                              <input type="number" step="0.1" id="revDcfTermGrowthInput" class="editable-field" value="2.0" />
+                          </div>
+                          <div class="model-input-group">
+                              <label>Discount Rate (%)</label>
+                              <input type="number" step="0.1" id="revDcfDiscountRateInput" class="editable-field" value="10.0" />
+                          </div>
+                      </div>
+                      <div class="model-results" style="grid-template-columns: 1fr;">
+                          <div class="result-box" style="text-align: center;">
+                              <span>Implied 10Y FCF Growth Rate</span>
+                              <strong id="revDcfImpliedGrowth" style="font-size: 1.5rem;">-%</strong>
                           </div>
                       </div>
                   </div>
