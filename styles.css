@@ -886,11 +886,43 @@ tbody tr:hover:not(.empty-state) {
     padding: 1rem;
   }
   
+  .app-nav, .fund-tabs, .sub-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+  
+  .fund-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .search-container {
+    max-width: 100%;
+  }
+
   .overview-cards {
     grid-template-columns: 1fr;
   }
   
+  .valuation-cards {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+  
+  .model-grid, .model-results {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .modal {
     padding: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 1rem;
   }
 }
