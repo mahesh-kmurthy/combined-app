@@ -1,6 +1,6 @@
-# Zocalo Tracker & Analyzer
+# VantagePier Tracker & Analyzer
 
-Zocalo is a comprehensive stock portfolio tracking and fundamental analysis web application. It combines real-time financial data fetching, secure cloud persistence (via Supabase), and interactive data visualization.
+VantagePier is a comprehensive stock portfolio tracking and fundamental analysis web application. It combines real-time financial data fetching, secure cloud persistence (via Supabase), and interactive data visualization.
 
 ## Architecture
 
