@@ -23,6 +23,21 @@ let currentLivePrices = {};
 const historyBody = document.getElementById('history-body');
 const holdingsBody = document.getElementById('holdings-body');
 
+const SAMPLE_PORTFOLIO = [
+  { type: 'BUY', ticker: 'AAPL', date: '2022-01-15', qty: 50, price: 150, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'MSFT', date: '2022-02-10', qty: 30, price: 280, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'NFLX', date: '2022-03-05', qty: 25, price: 350, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'DUOL', date: '2022-04-20', qty: 80, price: 90, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'CHWY', date: '2022-05-15', qty: 100, price: 40, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'DHR', date: '2022-06-10', qty: 40, price: 250, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'DKNG', date: '2022-07-05', qty: 150, price: 20, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'JPM', date: '2022-08-15', qty: 60, price: 120, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'PEP', date: '2022-09-10', qty: 45, price: 160, account: 'Sample', notes: 'Sample Transaction' },
+  { type: 'BUY', ticker: 'KO', date: '2022-10-05', qty: 80, price: 55, account: 'Sample', notes: 'Sample Transaction' }
+];
+
+let isAuthenticated = false;
+
 const overviewTotalValue = document.getElementById('overview-total-value');
 const overviewTotalCost = document.getElementById('overview-total-cost');
 const overviewTotalReturn = document.getElementById('overview-total-return');
@@ -46,22 +61,25 @@ async function init() {
   if (authBtn) {
     const { data } = await supabase.auth.getSession();
     if (data?.session) {
+      isAuthenticated = true;
       const name = data.session.user.user_metadata?.full_name || data.session.user.email || 'User';
       // Use just the first name if available
       const firstName = name.split(' ')[0];
       authBtn.textContent = `Logout (${firstName})`;
-      
-      // Auto-route logged in users to Dashboard
-      document.querySelector('[data-target="dashboard-view"]')?.click();
     } else {
-      // Auto-route unauthenticated users to the Welcome/About page
-      document.querySelector('[data-target="about-view"]')?.click();
+      isAuthenticated = false;
     }
+    
+    // Always render with auth state context
+    await renderHistory();
+    await renderDashboard();
+    renderHomePieChart();
     
     authBtn.addEventListener('click', async () => {
       const { data } = await supabase.auth.getSession();
       if (data?.session) {
         await supabase.auth.signOut();
+        isAuthenticated = false;
         authBtn.textContent = 'Login';
         await renderHistory();
         await renderDashboard();
@@ -95,12 +113,28 @@ function bindEvents() {
     tab.addEventListener('click', (e) => {
       if (e.target.id === 'auth-btn') return; // Auth button handled separately
       
-      navTabs.forEach(t => t.classList.remove('active'));
+      const isSubTab = e.target.classList.contains('sub-tab-btn');
+      const tabsGroup = isSubTab ? e.target.closest('.sub-tabs').querySelectorAll('.sub-tab-btn') : navTabs;
+      
+      tabsGroup.forEach(t => t.classList.remove('active'));
       e.target.classList.add('active');
-      document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+      
       const targetId = e.target.getAttribute('data-target');
-      if (targetId && document.getElementById(targetId)) {
-        document.getElementById(targetId).classList.remove('hidden');
+      if (!targetId) return;
+
+      if (isSubTab) {
+          const parentView = e.target.closest('.view-section');
+          parentView.querySelectorAll('.sub-tab-content').forEach(v => v.classList.add('hidden'));
+          const targetContent = document.getElementById(targetId);
+          if (targetContent) {
+              targetContent.classList.remove('hidden');
+              targetContent.classList.add('active');
+          }
+      } else {
+          document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+          if (document.getElementById(targetId)) {
+            document.getElementById(targetId).classList.remove('hidden');
+          }
       }
     });
   });
@@ -302,7 +336,11 @@ function bindEvents() {
 }
 
 async function renderHistory() {
-  const transactions = await getTransactions();
+  let transactions = await getTransactions();
+  if (!isAuthenticated && transactions.length === 0) {
+      transactions = SAMPLE_PORTFOLIO;
+  }
+  
   if (transactions.length === 0) {
     historyBody.innerHTML = '<tr class="empty-state"><td colspan="9">No transactions found. Add one above.</td></tr>';
     return;
@@ -331,7 +369,10 @@ async function renderHistory() {
 }
 
 async function renderDashboard() {
-  const transactions = await getTransactions();
+  let transactions = await getTransactions();
+  if (!isAuthenticated && transactions.length === 0) {
+      transactions = SAMPLE_PORTFOLIO;
+  }
   const holdings = getHoldings(transactions);
   
   if (holdings.length === 0) {
@@ -701,6 +742,47 @@ function renderPieChart(enrichedHoldings, transactions, usdRate, livePrices) {
             }
           }
         }
+      }
+    }
+  });
+}
+
+function renderHomePieChart() {
+  const ctx = document.getElementById('homePieChart')?.getContext('2d');
+  if (!ctx) return;
+  
+  const labels = ['AAPL', 'MSFT', 'NFLX', 'DUOL', 'CHWY', 'DHR', 'DKNG', 'JPM', 'PEP', 'KO'];
+  const data = [12, 12, 12, 10, 10, 10, 10, 10, 7, 7]; // Approximate sample weights
+
+  const backgroundColors = [
+    'rgba(96, 165, 250, 0.7)',  // Blue
+    'rgba(167, 139, 250, 0.7)', // Purple
+    'rgba(52, 211, 153, 0.7)',  // Green
+    'rgba(248, 113, 113, 0.7)', // Red
+    'rgba(251, 191, 36, 0.7)',  // Yellow
+    'rgba(244, 114, 182, 0.7)', // Pink
+    'rgba(45, 212, 191, 0.7)',  // Teal
+    'rgba(163, 230, 53, 0.7)',  // Lime
+    'rgba(96, 165, 250, 0.9)',  // Blue darker
+    'rgba(167, 139, 250, 0.9)'  // Purple darker
+  ];
+
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: backgroundColors,
+        borderColor: backgroundColors.map(c => c.replace('0.7', '1').replace('0.9', '1')),
+        borderWidth: 1,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
       }
     }
   });

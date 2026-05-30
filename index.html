@@ -16,18 +16,41 @@
         <h1>VantagePier</h1>
       </div>
       <nav class="app-nav">
-        <button class="nav-tab active" data-target="about-view">About</button>
-        <button class="nav-tab" data-target="dashboard-view">Dashboard</button>
-        <button class="nav-tab" data-target="transactions-view">Transactions</button>
+        <button class="nav-tab active" data-target="home-view">Home</button>
+        <button class="nav-tab" data-target="portfolio-view">Portfolio Management</button>
         <button class="nav-tab" data-target="fundamental-view">Fundamental Analysis</button>
         <button class="nav-tab" data-target="faq-view">Help & FAQ</button>
         <button id="auth-btn" class="nav-tab" style="background: var(--accent-color); color: white; border-radius: 8px;">Login</button>
+        <button class="nav-tab" data-target="about-view" style="opacity: 0.6;">About</button>
       </nav>
     </header>
 
     <main>
+      <!-- ================= HOME VIEW ================= -->
+      <div id="home-view" class="view-section active">
+        <div class="glass" style="max-width: 800px; margin: 0 auto; padding: 3rem; text-align: center; border-radius: var(--radius-lg);">
+          <h1 style="font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">VantagePier</h1>
+          <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 3rem;">Track your portfolio and analyze stocks using proprietary valuation models.</p>
+          
+          <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin-bottom: 3rem;">
+            <div class="glass" style="flex: 1; min-width: 250px; padding: 2rem; border-radius: var(--radius-md);">
+              <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Track & Benchmark</h3>
+              <p style="color: var(--text-muted); font-size: 0.95rem;">Track your portfolio's performance in real-time and objectively benchmark it against the S&P 500.</p>
+            </div>
+            <div class="glass" style="flex: 1; min-width: 250px; padding: 2rem; border-radius: var(--radius-md);">
+              <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Fundamental Analysis</h3>
+              <p style="color: var(--text-muted); font-size: 0.95rem;">Analyze stocks using proprietary VantagePier DCF and P/E models, or customize them to fit your thesis.</p>
+            </div>
+          </div>
+          
+          <div style="max-width: 350px; margin: 0 auto;">
+            <canvas id="homePieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
       <!-- ================= ABOUT / WELCOME VIEW ================= -->
-      <div id="about-view" class="view-section">
+      <div id="about-view" class="view-section hidden">
         <div class="glass" style="max-width: 800px; margin: 0 auto; padding: 3rem; text-align: center; border-radius: var(--radius-lg);">
           <h1 style="font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome to VantagePier</h1>
           <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 3rem;">A comprehensive stock portfolio tracking and fundamental analysis platform built for all equity investors.</p>
@@ -51,8 +74,15 @@
         </div>
       </div>
 
-      <!-- ================= PORTFOLIO DASHBOARD ================= -->
-      <div id="dashboard-view" class="view-section hidden">
+      <!-- ================= PORTFOLIO MANAGEMENT ================= -->
+      <div id="portfolio-view" class="view-section hidden">
+          <div class="sub-tabs" style="margin-bottom: 1.5rem;">
+              <button class="sub-tab-btn active" data-target="dashboard-view">Dashboard</button>
+              <button class="sub-tab-btn" data-target="transactions-view">Transactions</button>
+          </div>
+
+          <!-- Dashboard Sub-Tab -->
+          <div id="dashboard-view" class="sub-tab-content active">
       <!-- Overall Metrics -->
       <section class="overview-cards">
         <div class="card stat-card glass">
@@ -120,10 +150,9 @@
           <canvas id="portfolio-pie-chart"></canvas>
         </div>
       </section>
-      </div> <!-- End dashboard-view -->
+          </div> <!-- End dashboard-view -->
 
-      <!-- ================= TRANSACTIONS TAB ================= -->
-      <div id="transactions-view" class="view-section hidden">
+          <div id="transactions-view" class="sub-tab-content">
       <!-- Recent Transactions -->
       <section class="history-section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -162,6 +191,7 @@
         </div>
       </section>
       </div> <!-- End transactions-view -->
+      </div> <!-- End portfolio-view -->
 
       <!-- ================= FUNDAMENTAL ANALYSIS TAB ================= -->
       <div id="fundamental-view" class="view-section hidden">
