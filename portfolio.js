@@ -12,6 +12,8 @@ const txnModal = document.getElementById('transaction-modal');
 const navTabs = document.querySelectorAll('.nav-tab');
 const closeBtns = document.querySelectorAll('[data-close]');
 const txnForm = document.getElementById('transaction-form');
+const hamburgerMenu = document.getElementById('hamburgerMenu');
+const appNav = document.getElementById('appNav');
 
 let portfolioChart = null;
 let currentChartType = 'asset';
@@ -135,8 +137,16 @@ function bindEvents() {
           if (document.getElementById(targetId)) {
             document.getElementById(targetId).classList.remove('hidden');
           }
+          // Close mobile menu on click
+          hamburgerMenu.classList.remove('open');
+          appNav.classList.remove('open');
       }
     });
+  });
+
+  hamburgerMenu.addEventListener('click', () => {
+    hamburgerMenu.classList.toggle('open');
+    appNav.classList.toggle('open');
   });
 
   addTxnBtn.addEventListener('click', () => {

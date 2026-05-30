@@ -12,10 +12,17 @@
   <div class="app-container">
     <header class="app-header">
       <div class="logo">
-        <img src="logo.png" alt="VantagePier Logo" height="36" />
+        <img src="Logo.png" alt="VantagePier Logo" height="36" />
         <h1>VantagePier</h1>
       </div>
-      <nav class="app-nav">
+      
+      <button class="hamburger-menu" id="hamburgerMenu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav class="app-nav" id="appNav">
         <button class="nav-tab active" data-target="home-view">Home</button>
         <button class="nav-tab" data-target="portfolio-view">Portfolio Management</button>
         <button class="nav-tab" data-target="fundamental-view">Fundamental Analysis</button>
@@ -152,6 +159,7 @@
       </section>
           </div> <!-- End dashboard-view -->
 
+          <!-- Transactions Sub-Tab -->
           <div id="transactions-view" class="sub-tab-content">
       <!-- Recent Transactions -->
       <section class="history-section">

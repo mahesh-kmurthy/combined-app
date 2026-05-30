@@ -880,13 +880,66 @@ tbody tr:hover:not(.empty-state) {
     color: var(--negative);
 }
 
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  padding: 8px;
+}
+.hamburger-menu .bar {
+  width: 25px;
+  height: 3px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.hamburger-menu.open .bar:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger-menu.open .bar:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-menu.open .bar:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app-container {
     padding: 1rem;
   }
+
+  .hamburger-menu {
+    display: flex;
+  }
   
-  .app-nav, .fund-tabs, .sub-tabs {
+  .app-nav {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: var(--bg-dark);
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+  .app-nav.open {
+    display: flex;
+  }
+  .app-nav .nav-tab {
+    width: 90%;
+    margin: 5px 0;
+    text-align: center;
+  }
+  
+  .fund-tabs, .sub-tabs {
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
