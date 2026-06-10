@@ -81,3 +81,28 @@ CREATE POLICY "Users can delete their own transactions" ON transactions FOR DELE
 - **Fundamental Analysis:** Deep dive into 5 years of financials, automatically extracting Income Statements, Balance Sheets, and Cash Flows.
 - **Valuation Models:** Real-time P/E Forecasting and Discounted Cash Flow (DCF) intrinsic value modeling.
 - **Excel Export:** Download all financial data directly into an Excel file.
+
+## AI Leverage & System Architecture
+
+VantagePier was built using advanced AI-assisted development methodologies, showcasing how natural language prompting can be used to construct a full-stack financial application.
+
+### Prompting Strategy
+The application was built iteratively through a series of structured prompts:
+1. **Foundation First**: Initial prompts focused purely on the frontend structure (HTML/CSS layout) and establishing the glassmorphism design system without any logic.
+2. **Logic Integration**: Subsequent prompts instructed the AI to build `portfolio.js` to handle internal state (IRR, cost basis) using mock data.
+3. **External Systems**: Finally, complex prompts were used to integrate Supabase auth and connect to the Python/FastAPI backend for real-time market data.
+
+### Structured Logical Constraints
+To ensure the AI produced reliable and maintainable code, strict architectural constraints were enforced during prompting:
+- **Separation of Concerns**: The AI was explicitly instructed to split logic into `portfolio.js` (UI/State), `storage.js` (Database/Persistence), and `api.js` (External Data).
+- **Graceful Degradation**: A constraint was set that the app *must* work without a database connection. The AI successfully built a dual-storage system in `storage.js` that falls back to `localStorage` (or a Sample Portfolio) if the user is unauthenticated.
+
+### Handling Error Corrections
+During development, AI-generated code required guided corrections for complex edge cases:
+- **CORS & Local Execution**: When modern ES6 modules caused local CORS issues, the AI was prompted to generate a lightweight Python Server (`api/index.py`) to bypass browser restrictions.
+- **API Rate Limiting**: When hitting Yahoo Finance API limits, the AI was instructed to build a caching mechanism (`history_cache`) using `localStorage` to save historical benchmark data and prevent redundant network calls.
+
+### Data Ingestion Management
+Ingesting user data and market data required robust AI-designed solutions:
+- **CSV Parsing**: The AI generated a custom CSV parser capable of handling various date formats (US vs Euro) and ignoring commas within quoted numbers (e.g., `"1,000.00"`).
+- **Currency Normalization**: To handle the ingestion of Canadian stocks, the AI was tasked with fetching live exchange rates (DLR/DLR-U.TO) and normalizing all portfolio metrics to USD in real-time.

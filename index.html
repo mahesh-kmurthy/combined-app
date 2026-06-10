@@ -50,8 +50,19 @@
             </div>
           </div>
           
-          <div style="max-width: 350px; margin: 0 auto;">
-            <canvas id="homePieChart"></canvas>
+          <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;">
+            <div style="flex: 1; min-width: 200px; max-width: 350px;">
+              <h4 style="color: var(--text-primary); margin-bottom: 1rem;">Asset Allocation</h4>
+              <canvas id="homePieChart"></canvas>
+            </div>
+            <div style="flex: 1; min-width: 200px; max-width: 350px;">
+              <h4 style="color: var(--text-primary); margin-bottom: 1rem;">Market Cap</h4>
+              <canvas id="homeCapChart"></canvas>
+            </div>
+            <div style="flex: 1; min-width: 200px; max-width: 350px;">
+              <h4 style="color: var(--text-primary); margin-bottom: 1rem;">Industry</h4>
+              <canvas id="homeIndustryChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
@@ -106,9 +117,10 @@
           <span class="stat-badge" id="overview-return-pct">0.00%</span>
         </div>
         <div class="card stat-card glass" id="voo-benchmark-card">
-          <h3 title="What your portfolio would be worth if invested entirely in the S&P 500">VOO Benchmark Value</h3>
-          <div style="margin-top: 6px; margin-bottom: 12px;">
+          <h3 title="What your portfolio would be worth if invested entirely in the S&P 500">S&P500 Benchmark Value</h3>
+          <div style="margin-top: 6px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <span class="stat-badge" id="overview-voo-diff" style="position: relative; top: 0; right: 0; display: inline-block;">---</span>
+            <span title="Positive Difference (Green) means your portfolio beat the index" style="cursor: help; color: var(--text-muted); font-size: 1.1rem;">ⓘ</span>
           </div>
           <p class="stat-value" id="overview-voo-value">---</p>
         </div>
@@ -423,7 +435,7 @@
             </div>
             <div style="margin-bottom: 2rem;">
               <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Benchmark Information</h3>
-              <p style="color: var(--text-muted); line-height: 1.6;">The portfolio performance is heavily benchmarked against <strong>VOO</strong>, which tracks the S&P 500 Index. The "VOO Benchmark Value" on your Dashboard shows exactly what your portfolio would currently be worth if you had invested all your capital into the S&P 500 on the exact dates of your transactions.</p>
+              <p style="color: var(--text-muted); line-height: 1.6;">The portfolio performance is heavily benchmarked against <strong>VOO</strong>, which tracks the S&P 500 Index. The "S&P500 Benchmark Value" on your Dashboard shows exactly what your portfolio would currently be worth if you had invested all your capital into the S&P 500 on the exact dates of your transactions.</p>
             </div>
             <div>
               <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Inputting Non-US Tickers</h3>
@@ -512,9 +524,14 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="storage.js?v=3"></script>
-  <script type="module" src="api.js?v=3"></script>
-  <script type="module" src="portfolio.js?v=3"></script>
-  <script src="fundamental.js?v=3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script>
+    // Register the plugin globally for all charts
+    Chart.register(ChartDataLabels);
+  </script>
+  <script type="module" src="storage.js?v=4"></script>
+  <script type="module" src="api.js?v=4"></script>
+  <script type="module" src="portfolio.js?v=4"></script>
+  <script src="fundamental.js?v=4"></script>
 </body>
 </html>

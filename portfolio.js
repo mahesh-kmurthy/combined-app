@@ -758,11 +758,20 @@ function renderPieChart(enrichedHoldings, transactions, usdRate, livePrices) {
 }
 
 function renderHomePieChart() {
-  const ctx = document.getElementById('homePieChart')?.getContext('2d');
-  if (!ctx) return;
+  const assetCtx = document.getElementById('homePieChart')?.getContext('2d');
+  const capCtx = document.getElementById('homeCapChart')?.getContext('2d');
+  const indCtx = document.getElementById('homeIndustryChart')?.getContext('2d');
+  
+  if (!assetCtx || !capCtx || !indCtx) return;
   
   const labels = ['AAPL', 'MSFT', 'NFLX', 'DUOL', 'CHWY', 'DHR', 'DKNG', 'JPM', 'PEP', 'KO'];
-  const data = [12, 12, 12, 10, 10, 10, 10, 10, 7, 7]; // Approximate sample weights
+  const assetData = [12, 12, 12, 10, 10, 10, 10, 10, 7, 7]; // Approximate sample weights
+
+  const capLabels = ['Large Cap', 'Mid Cap', 'Small Cap'];
+  const capData = [58, 20, 22]; // Approximate
+
+  const indLabels = ['Technology', 'Consumer', 'Healthcare', 'Financials'];
+  const indData = [24, 46, 10, 10]; // Approximate
 
   const backgroundColors = [
     'rgba(96, 165, 250, 0.7)',  // Blue
@@ -777,24 +786,64 @@ function renderHomePieChart() {
     'rgba(167, 139, 250, 0.9)'  // Purple darker
   ];
 
-  new Chart(ctx, {
+  const commonOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        color: '#ffffff',
+        font: { weight: 'bold', size: 10 },
+        formatter: (value, ctx) => {
+          return ctx.chart.data.labels[ctx.dataIndex];
+        },
+        display: 'auto'
+      }
+    }
+  };
+
+  new Chart(assetCtx, {
     type: 'doughnut',
     data: {
       labels: labels,
       datasets: [{
-        data: data,
+        data: assetData,
         backgroundColor: backgroundColors,
         borderColor: backgroundColors.map(c => c.replace('0.7', '1').replace('0.9', '1')),
         borderWidth: 1,
         hoverOffset: 4
       }]
     },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false }
-      }
-    }
+    options: commonOptions
+  });
+
+  new Chart(capCtx, {
+    type: 'doughnut',
+    data: {
+      labels: capLabels,
+      datasets: [{
+        data: capData,
+        backgroundColor: [backgroundColors[0], backgroundColors[1], backgroundColors[2]],
+        borderColor: [backgroundColors[0], backgroundColors[1], backgroundColors[2]].map(c => c.replace('0.7', '1')),
+        borderWidth: 1,
+        hoverOffset: 4
+      }]
+    },
+    options: commonOptions
+  });
+
+  new Chart(indCtx, {
+    type: 'doughnut',
+    data: {
+      labels: indLabels,
+      datasets: [{
+        data: indData,
+        backgroundColor: [backgroundColors[4], backgroundColors[5], backgroundColors[6], backgroundColors[7]],
+        borderColor: [backgroundColors[4], backgroundColors[5], backgroundColors[6], backgroundColors[7]].map(c => c.replace('0.7', '1')),
+        borderWidth: 1,
+        hoverOffset: 4
+      }]
+    },
+    options: commonOptions
   });
 }
 
